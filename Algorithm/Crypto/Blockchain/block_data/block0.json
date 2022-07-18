@@ -1,0 +1,10 @@
+{
+    "time": 1648815643.4925513,
+    "number": 0,
+    "name": "block0",
+    "nonce": 206,
+    "hash_last_one": null,
+    "transactions_mercls_tree": null,
+    "complexity": 2,
+    "hash": "00b8acd4f744d6d7133aad369dddc574c756902be438d20ecc48acd93c408a08"
+}
