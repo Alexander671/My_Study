@@ -1,9 +1,3 @@
-#######################
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-## не сделано
-## малёха задрочное
-
-
 from math import sqrt
 
 
@@ -25,16 +19,16 @@ class Track:
 
         for i in range(0, len(iter_list) - 1):
             # L = sqrt((x1-x0)^2 + (y1-y0)^2) 
-            first = (iter_list[i].to_x - iter_list[i + 1].to_x) ** 2
-            second = (iter_list[i].to_y - iter_list[i + 1].to_y) ** 2         
-            sum += sqrt(first + second)      
+            first = (iter_list[i + 1].to_x - iter_list[i].to_x) ** 2
+            second = (iter_list[i + 1].to_y - iter_list[i].to_y) ** 2         
+            sum += sqrt(first + second)     
         return int(sum) 
 
     def __eq__(self, __o: object) -> bool:
-        len(self) == len(__o)
+        return len(self) == len(__o)
 
     def __lt__(self, __o: object) -> bool:
-        len(self) > len(__o)
+        return len(self) < len(__o)
 
 
 class TrackLine:
@@ -43,11 +37,11 @@ class TrackLine:
         self.to_y = to_y # - координаты следующей точки маршрута (целые или вещественные числа); 
         self.max_speed = max_speed # - максимальная скорость на данном участке (целое число).
 
-track1, track2 = Track(1,2), Track(0, 1)
+track1, track2 = Track(0,0), Track(0, 1)
 track1.add_track(TrackLine(2, 4, 100))
 track1.add_track(TrackLine(5, -4, 100))
 
 
 track2.add_track(TrackLine(3, 2, 90))
 track2.add_track(TrackLine(10, 8, 90))
-res_eq = True
+res_eq = track1 == track2
