@@ -1,69 +1,58 @@
-class Observer:
-    def update(self, data):
-        pass
+class Aircraft:
+    def __init__(self, model, mass, speed, top):
+        self.verify_types(model, mass, speed, top)
+        self._model = model
+        self._mass = mass
+        self._speed = speed
+        self._top = top
 
-    def __hash__(self):
-        return hash(id(self))
-
-
-class Subject:
-    def __init__(self):
-        self.__observers = {}
-        self.__data = None
-
-    def add_observer(self, observer):
-        self.__observers[observer] = observer
-
-    def remove_observer(self, observer):
-        if observer in self.__observers:
-            self.__observers.pop(observer)
-
-    def __notify_observer(self):
-        for ob in self.__observers:
-            ob.update(self.__data)
-
-    def change_data(self, data):
-        self.__data = data
-        self.__notify_observer()
+    def verify_types(self, model, mass, speed, top):
+        for i in [mass, speed, top]:
+            self.verify_positive(i)
+        if not type(model) == str:
+            raise TypeError('неверный тип аргумента')
 
 
-class Data:
-    def __init__(self, temp, press, wet):
-        self.temp = temp    # температура
-        self.press = press  # давление
-        self.wet = wet      # влажность
+    def verify_positive(self, number):
+        if type(number) == int or type(number) == float:
+            if number < 0:
+                raise TypeError('неверный тип аргумента')
+        else:
+            raise TypeError('неверный тип аргумента')
+
+    def verify_str(self, string):
+        if type(string) != str:
+            raise TypeError('неверный тип аргумента')
+
+    def verify_int(self, number):
+        if type(number) == int:
+            if number < 0:
+                raise TypeError('неверный тип аргумента')
+        else:
+            raise TypeError('неверный тип аргумента')
+
+class PassengerAircraft(Aircraft): # - пассажирский самолет;
+    def __init__(self, model, mass, speed, top, chairs):
+        super().__init__(model, mass, speed, top,)
+        self.verify_int(chairs)
+        self._chairs = chairs
 
 
-# здесь объявляйте дочерние классы 
-class TemperatureView(Observer):
-    def update(self,data):
-        print(f"Текущая температура {data.temp}")
+class WarPlane(Aircraft): # - военный самолет.
+    def __init__(self, model, mass, speed, top, weapons:dict):
+        super().__init__(model, mass, speed, top,)
+        if type(weapons) != dict:
+            raise TypeError('неверный тип аргумента')
 
-class PressureView(Observer):
-    def update(self,data):
-        print(f"Текущее давление {data.press}")
-
-class WetView(Observer):
-    def update(self,data):
-        print(f"Текущая влажность {data.wet}")
+        map(lambda x: self.verify_positive(x), (weapons.values()))
+        map(lambda x: self.verify_str(x), (weapons.keys()))
+        
+        self._weapons = weapons
 
 
-subject = Subject()
-tv = TemperatureView()
-pr = PressureView()
-wet = WetView()
 
-subject.add_observer(tv)
-subject.add_observer(pr)
-subject.add_observer(wet)
-
-subject.change_data(Data(23, 150, 83))
-# выведет строчки:
-# Текущая температура 23
-# Текущее давление 150
-# Текущая влажность 83
-subject.remove_observer(wet)
-subject.change_data(Data(24, 148, 80))
-# выведет строчки:
-# Текущая температура 24
-# Текущее давление 148
+obj1 = PassengerAircraft('МС-21', 1250, 8000, 12000.5, 140)
+obj2 = PassengerAircraft('SuperJet', 1145, 8640, 11034, 80)
+obj3 = WarPlane('Миг-35', 7034, 25000, 2000, {"ракета": 4, "бомба": 10})
+obj4 = WarPlane('Су-35', 7034, 34000, 2400, {"ракета": 4, "бомба": 7})
+planes = [obj1, obj2, obj3, obj4]
