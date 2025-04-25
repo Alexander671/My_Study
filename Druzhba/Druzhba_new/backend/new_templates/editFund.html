@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/normalize.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/feeCreation.css') }}">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Изменение сбора</title>
+</head>
+<body>
+    <div class="container">
+        <main class="app">
+            <div class="wrapper">
+                <img src="{{ url_for('static', path='/img/backgrounds/blur-back-2.png') }}" alt="">
+            </div>
+            <div class="app__info block_margin">
+                <div class="info__title info__title_margin">
+                    <h3>Информация о сборе</h3>
+                </div>
+            </div>
+            <form class="app__form" onsubmit="sendData(event)">
+                <ul class="form__blocks block_margin">
+                    <li class="form__item form__item_margin">
+                        <input id="reason" name="reason" class="form__field" type="text" placeholder=" " required>
+                        <label for="reason" class="field__placeholder">Тип события</label>
+                    </li>
+                    <li class="form__item form__item_margin">
+                        <input id="target" name="target" class="form__field" type="text" placeholder=" " required>
+                        <label for="target" class="field__placeholder">Кому собираем</label>
+                    </li>
+                    <li class="form__item form__item_margin">
+                        <input id="event-date-input" class="form__field" type="text" placeholder=" " required>
+                        <label for="event-date-input" class="field__placeholder">Дата события</label>
+                        <input id="event-date" class="form__date" type="date" name="event-date">
+                    </li>
+                    <li class="form__item">
+                        <input id="transfer-info" name="transfer_info" class="form__field" type="text" placeholder=" " required>
+                        <label for="transfer-info" class="field__placeholder field__placeholder_s-font">Ссылка на внешнюю копилку/карту</label>
+                    </li>
+                    <ul class="form__item-list">
+                        <span class="item-list__span item-list__span_margin">Ссылки на желаемый подарок</span>
+                        <li class="form__item form__item_link form__item_margin">
+                            <input id="gift-info" class="form__field" name='gift_info' type="text" placeholder=" ">
+                            <label for="gift-info" class="field__placeholder">Введите ссылку</label>
+                            <span class="item__button item__button_add"></span>
+                        </li>
+                    </ul>
+                </ul>
+                <div class="form__party-block form__party-block_margin">
+                    <input id="add-info" class="form__box" type="checkbox" hidden>
+                    <label class="box__label" for="add-info"></label>
+                    <span class="box__span">
+                        Добавить данные о праздновании
+                    </span>
+                    <ul class="party-block__wrapper">
+                        <li class="form__item party-block__item form__item_margin">
+                            <input id="congratulation-date-input" class="form__field" type="text" placeholder=" ">
+                            <label for="congratulation-date-input" class="field__placeholder">Дата события</label>
+                            <input id="congratulation-date" type="date" class="form__date"  name="congratulation_date">
+                        </li>
+                        <li class="form__item party-block__item form__item_margin">
+                            <input id="congratulation-time" name="congratulation_time" class="form__field" type="text" placeholder=" ">
+                            <label for="congratulation-time" class="field__placeholder">Время</label>
+                        </li>
+                        <li class="form__item party-block__item form__item_margin">
+                            <input id="event-place" name="event_place" class="form__field" type="text" placeholder=" ">
+                            <label for="event-place" class="field__placeholder">Ссылка на место празднования</label>
+                        </li>
+                        <li class="form__item party-block__item">
+                            <input id="event-dresscode" name="event_dresscode" class="form__field" type="text" placeholder=" ">
+                            <label for="event-dresscode" class="field__placeholder">Дресс-код</label>
+                        </li>
+                    </ul>
+                </div>
+                <div class="form__footer">
+                    <span class="form__cancel">Отмена</span>
+                    <button class="form__button">Сохранить</button>
+                </div>
+            </form>
+        </main>
+    </div>
+    <script type="text/javascript" src="{{ url_for('static', path='js/blur_and_focus.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', path='js/create_mask.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', path='js/send_api.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', path='js/calendar.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', path='js/autocomplete.js') }}"></script>
+        <!-- Создание добавляющихся ссылок -->
+    <script type="text/javascript" src="{{ url_for('static', path='js/add_item.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', path='/js/inputmask.js') }}"></script>
+    <script>
+
+        /* Создание валидации полей */
+
+        /* Инициализация маски для полей: имя, дата */
+
+        const event_date_mask = create_date_mask("#event-date-input")
+        const con_date_mask = create_date_mask("#congratulation-date-input")
+        const time_mask = create_time_mask("#congratulation-time")
+
+        /* Создание календаря */
+
+        create_calendar("#event-date", event_date_mask)
+        create_calendar("#congratulation-date", con_date_mask)
+
+        /* Валидация congratulation_time */
+
+        /* Валидация congratulation_time */
+
+        const time_input = document.querySelector("#congratulation-time")
+
+        time_input.onchange = () => {
+            let time = time_input.value.split(":")
+            if (time[1] === undefined) {
+                time[1] = "00"
+            }
+            if (time[0] !== undefined) {
+                time_input.value = `${time[0]}:${time[1]}`
+            }
+            time_mask.updateValue()
+        }
+
+        /* Автокомплит */
+
+        function create_links(data_array) {
+            for(let key in data_array) {
+                if (key != 0) {
+                    mainItem.querySelector(".item__button").click()
+                }
+                mainItem.querySelector(".form__field").value = data_array[key]
+            }
+
+        }
+
+        function auto(data_array) {
+            data_array.forEach((data_item) => {
+                let [_id, data, mask] = data_item
+                autocomplete(_id, data, mask)
+            })
+        }
+        auto([
+            ["#reason", '{{ reason }}', null],
+            ["#target", '{{ target }}', null],
+            ["#event-date", '{{ event_date }}', event_date_mask],
+            ["#transfer-info", '{{ transfer_info }}', null]
+        ])
+        create_links(JSON.parse({{ gift_info | tojson }}))
+
+        if ('{{ congratulation_date }}' || '{{ congratulation_time }}' || '{{ event_place }}' || '{{ event_dresscode }}') {
+            document.querySelector("#add-info").checked = true
+            auto([
+                ["#congratulation-date", '{{ congratulation_date }}', con_date_mask],
+                ["#congratulation-time", '{{ congratulation_time }}'.slice(0, 5), time_mask],
+                ["#event-place", '{{ event_place }}', null],
+                ["#event-dresscode", '{{ event_dresscode }}', null]
+            ])
+        }
+
+        /* Отправка формы */
+
+        let App = window.Telegram.WebApp;
+
+        document.querySelector(".form__cancel").onclick = () => {
+            App.close()
+        }
+
+        let api_url = "{{host}}";
+        let fund_id = "{{fund_id}}";
+
+        let form_button = document.querySelector(".form__button")
+
+
+        function create_gift_info_data() {
+            let data = {}
+            item_list.querySelectorAll(".form__field").forEach((input, index) => {
+                data[`${index}`] = input.value
+            })
+            return JSON.stringify(data)
+        }
+
+        function sendData(event) {
+            event.preventDefault()
+            let url = `${api_url}api/fundraising/${fund_id}/`;
+
+            let congratulations_date = document.getElementById("congratulation-date").value;
+            let congratulations_time = document.getElementById("congratulation-time").value;
+
+            let fund = {
+                reason: document.getElementById("reason").value,
+                target: document.getElementById("target").value,
+                start: new Date().toJSON().slice(0, 10),
+                event_date: document.getElementById("event-date").value,
+                transfer_info: document.getElementById("transfer-info").value,
+                gift_info: create_gift_info_data(),
+                congratulation_date: congratulations_date === "" ? null : congratulations_date,
+                congratulation_time: congratulations_time === "" ? null : congratulations_time,
+                event_place: document.getElementById("event-place").value,
+                event_dresscode: document.getElementById("event-dresscode").value,
+            };
+            ajaxSend(App, url, fund, "PUT")
+            return true
+        }
+
+    </script>
+</body>
+</html>

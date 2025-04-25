@@ -1,0 +1,6 @@
+Django==4.1.2
+drf_spectacular==0.26.5
+python-dotenv==1.0.0
+psycopg2-binary==2.9.9
+django-qr-code==3.1.1
+djangorestframework-simplejwt==5.3.0

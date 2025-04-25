@@ -1,0 +1,70 @@
+diff --git a/.env b/.env
+index 8731414..043e3ef 100644
+--- a/.env
++++ b/.env
+@@ -22,7 +22,7 @@ REDIS_LOGIN=
+ REDIS_PASSWORD=${PROJECT_NAME}_password
+ 
+ # telegram
+-TELEGRAM_TOKEN=6601121893:AAH-Bt9WjDSND1nYx6LTglqYZIGjM1T-RZM
++TELEGRAM_TOKEN=1969608334:AAGEMptlh7TYQjkG0XxzGY7yHJhe1_SGlkY
+ REDIS_MESSAGES_KEY=TELEGRAM_BOT_MESSAGE
+ REDIS_EXP_KEY=TELEGRAM_BOT_EXP
+ REDIS_EXP_TIME=5
+diff --git a/company/serializers.py b/company/serializers.py
+index 4d03d26..d56bab5 100644
+--- a/company/serializers.py
++++ b/company/serializers.py
+@@ -1,7 +1,10 @@
++from django.db.models import Count, Sum, Avg, Q
+ from rest_framework import serializers
+ 
+ from .models import Company, CompanyMember
+ 
++from django.db.models import Count, Case, When, IntegerField
++
+ 
+ class CompanyMemberSerializer(serializers.ModelSerializer):
+ 
+@@ -38,14 +41,20 @@ class CompanySerializer(serializers.ModelSerializer):
+     def to_representation(self, instance):
+         ret = super().to_representation(instance)
+ 
+-        ret['company_members_amount'] = 0
+-        ret['fundraising_amount'] = 0
+-        ret['successful_fundraising_amount'] = 0
+-        ret['fundraising_members_amount'] = 0
+-        ret['transactions_amount'] = 0
+-        ret['fundraising_sum'] = 0
+-        ret['bill_average'] = 0
+-        ret['open_fundraising_amount'] = 0
++        user = instance.company_members.aggregate(company_members_amount=Count('user'))
++
++        fundraising = instance.fundraisings.aggregate(fundraising_amount=Count('pk'), 
++                                                      successful_fundraising_amount=Count('status', filter=Q(status='success')),
++                                                      fundraising_members_amount=Count('fundraising_members'),
++                                                      open_fundraising_amount=Count('status', filter=Q(status='open')))
++
++        transaction = instance.fundraisings.aggregate(transactions_amount=Count("transactions"),
++                                                      bill_average=Avg('transactions__amount', default=0),
++                                                      fundraising_sum=Sum('transactions__amount', default=0),)
++
++        ret.update(user)
++        ret.update(fundraising)
++        ret.update(transaction)
+ 
+         return ret
+ 
+diff --git a/company/views.py b/company/views.py
+index 722dd8c..f7f3aeb 100644
+--- a/company/views.py
++++ b/company/views.py
+@@ -18,7 +18,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
+         return CompanySerializer
+ 
+     def get_queryset(self):
+-        return self.queryset.filter(Q(owner=self.request.user) | Q(company_members__user=self.request.user))
++        return self.queryset.filter(Q(owner=self.request.user) | Q(company_members__user=self.request.user)).distinct()
+ 
+     def perform_create(self, serializer):
+         serializer.save(owner=self.request.user)

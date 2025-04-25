@@ -1,0 +1,12 @@
+aiogram
+python-dotenv
+fastapi
+uvicorn
+SQLAlchemy
+psycopg2-binary
+alembic
+pytest
+pytest-asyncio
+requests
+jinja2
+telethon
